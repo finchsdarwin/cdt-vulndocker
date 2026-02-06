@@ -192,7 +192,7 @@ Before you begin, you need:
 - Required software installed (Git, OpenTofu, Ansible, Python 3)
 - An RSA SSH key pair uploaded to OpenStack
 
-For detailed setup instructions, see [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md).
+For detailed setup instructions, see [DEPLOYMENT-GUIDE.md](https://github.com/cyberbalsa/cdt-automation/blob/main/docs/deployment-guide.md).
 
 ---
 
@@ -230,7 +230,7 @@ sudo apt update && sudo apt install -y ansible
 cd ~/ansible && ansible-playbook playbooks/site.yml
 ```
 
-For step-by-step instructions, see [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md).
+For step-by-step instructions, see [DEPLOYMENT-GUIDE.md](https://github.com/cyberbalsa/cdt-automation/blob/main/docs/deployment-guide.md).
 
 ---
 
