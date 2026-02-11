@@ -1,8 +1,14 @@
 # ==============================================================================
-# OPENTOFU VARIABLES
+# OPENTOFU VARIABLES — Shared Infrastructure
 # ==============================================================================
-# This file defines input variables that customize your infrastructure.
-# Variables let you change settings without modifying the main code.
+# This file defines variables shared across multiple .tf files (network,
+# security groups, providers, etc.).
+#
+# VM-specific variables (count, image, hostnames) live in each instance file:
+#   instances-blue-windows.tf  <- blue_windows_count, windows_image_name, ...
+#   instances-blue-linux.tf    <- blue_linux_count, debian_image_name, ...
+#   instances-scoring.tf       <- scoring_count, scoring_image_name
+#   instances-red-kali.tf      <- red_kali_count, kali_image_name
 #
 # DOCUMENTATION:
 # - OpenTofu Variables: https://opentofu.org/docs/language/values/variables/
@@ -75,54 +81,6 @@ variable "external_network" {
 }
 
 # ------------------------------------------------------------------------------
-# VM IMAGE CONFIGURATION
-# ------------------------------------------------------------------------------
-# These variables specify which operating system images to use.
-# Images must exist in OpenStack before you can use them.
-
-variable "windows_image_name" {
-  description = "Name of the Windows image in OpenStack Glance"
-  type        = string
-  default     = "WindowsServer2022"
-
-  # VIEW AVAILABLE IMAGES:
-  # 1. OpenStack Dashboard: Compute → Images
-  # 2. Command line: openstack image list
-  #
-  # Common images at RIT CyberRange:
-  # - WindowsServer2022
-  # - WindowsServer2019
-  # - Windows10
-}
-
-variable "debian_image_name" {
-  description = "Name of the Linux image in OpenStack Glance"
-  type        = string
-  default     = "Ubuntu2404Desktop"
-
-  # NOTE: Despite the variable name saying "debian", you can use any Linux image.
-  # The default uses Ubuntu with LXQT desktop pre-installed.
-  #
-  # Common Linux images:
-  # - Ubuntu2404Desktop (Ubuntu 24.04 with LXQT)
-  # - debian-trixie-amd64-cloud
-  # - kali-2024 (for Red Team attack machines)
-}
-
-variable "scoring_image_name" {
-  description = "Name of the image for scoring servers"
-  type        = string
-  default     = "Ubuntu2404Desktop"
-}
-
-variable "kali_image_name" {
-  description = "Name of the Kali Linux image for Red Team"
-  type        = string
-  default     = "Kali2025"
-  # Run 'openstack image list' to see available images
-}
-
-# ------------------------------------------------------------------------------
 # VM SIZE CONFIGURATION
 # ------------------------------------------------------------------------------
 
@@ -152,7 +110,7 @@ variable "flavor_name" {
 variable "keypair" {
   description = "Name of the SSH keypair in OpenStack (must be uploaded first)"
   type        = string
-  default     = "goad-key"
+  default     = "CHANGEME-YourKeypairName"
 
   # IMPORTANT: Change this to YOUR keypair name!
   #
@@ -169,52 +127,6 @@ variable "keypair" {
 }
 
 # ------------------------------------------------------------------------------
-# VM COUNT CONFIGURATION
-# ------------------------------------------------------------------------------
-# These variables control how many VMs to create.
-
-variable "scoring_count" {
-  description = "Number of scoring servers to create in main project"
-  type        = number
-  default     = 1
-}
-
-variable "blue_windows_count" {
-  description = "Number of Blue Team Windows VMs (first becomes Domain Controller)"
-  type        = number
-  default     = 15
-}
-
-variable "blue_linux_count" {
-  description = "Number of Blue Team Linux VMs"
-  type        = number
-  default     = 5
-}
-
-variable "red_kali_count" {
-  description = "Number of Red Team Kali attack VMs"
-  type        = number
-  default     = 10
-}
-
-# ------------------------------------------------------------------------------
-# CUSTOM HOSTNAME CONFIGURATION
-# ------------------------------------------------------------------------------
-# These variables let you give meaningful names to your VMs.
-
-variable "blue_windows_hostnames" {
-  description = "Custom hostnames for Blue Team Windows VMs (optional)"
-  type        = list(string)
-  default     = ["dc01", "wks-alpha", "wks-debbie"]
-}
-
-variable "blue_linux_hostnames" {
-  description = "Custom hostnames for Blue Team Linux VMs (optional)"
-  type        = list(string)
-  default     = ["webserver", "comms"]
-}
-
-# ------------------------------------------------------------------------------
 # PROJECT CONFIGURATION (Multi-Project Grey Team)
 # ------------------------------------------------------------------------------
 # These variables specify which OpenStack projects to deploy resources to.
@@ -223,19 +135,20 @@ variable "blue_linux_hostnames" {
 variable "main_project_id" {
   description = "OpenStack project ID for main/scoring infrastructure (e.g., cdtalpha)"
   type        = string
-  default     = "04846fb2e027424d8898953062787b16"
+  default     = "CHANGEME-main-project-id"
+  # Find it: openstack project show <project-name> -f value -c id
 }
 
 variable "blue_project_id" {
   description = "OpenStack project ID for Blue Team (e.g., cdtalpha-cdtbravo)"
   type        = string
-  default     = "d25474b0db314855b36e659c777893c1"
+  default     = "CHANGEME-blue-project-id"
 }
 
 variable "red_project_id" {
   description = "OpenStack project ID for Red Team (e.g., cdtalpha-cdtcharlie)"
   type        = string
-  default     = "4cba761707eb4606a750fb7b3de3948d"
+  default     = "CHANGEME-red-project-id"
 }
 
 # ------------------------------------------------------------------------------
@@ -253,7 +166,7 @@ variable "red_project_id" {
 # - Other services must be explicitly assigned
 #
 # EXAMPLE: To add a new web server:
-# 1. Add hostname to blue_linux_hostnames
+# 1. Add hostname to blue_linux_hostnames (in instances-blue-linux.tf)
 # 2. Add hostname to the "web" list below
 # 3. Run: tofu apply && python3 import-tofu-to-ansible.py
 
@@ -287,16 +200,20 @@ variable "service_hosts" {
 # ==============================================================================
 # ADDING NEW VARIABLES
 # ==============================================================================
-# To add a variable for your competition:
+# Shared variables (network, flavor, keypair, projects) go in this file.
+# VM-specific variables (count, image, hostnames) go in the matching
+# instances-*.tf file, so everything for a VM type is in one place.
 #
-# 1. Define it here:
+# To add a variable:
+#
+# 1. Define it:
 #    variable "my_variable" {
 #      description = "What this variable does"
 #      type        = string
 #      default     = "default_value"
 #    }
 #
-# 2. Use it in other .tf files:
+# 2. Use it in .tf files:
 #    name = var.my_variable
 #
 # 3. Override the default (optional):

@@ -40,8 +40,8 @@ The `import-tofu-to-ansible.py` script bridges OpenTofu and Ansible by reading `
 ### IP Address Scheme
 - **Scoring VMs**: `10.10.10.11`, `10.10.10.12`, etc. (main project)
 - **Blue Windows VMs**: `10.10.10.21`, `10.10.10.22`, `10.10.10.23` (first VM is DC)
-- **Blue Linux VMs**: `10.10.10.31`, `10.10.10.32`, `10.10.10.33`, `10.10.10.34`
-- **Red Kali VMs**: `10.10.10.41`, `10.10.10.42`, etc.
+- **Blue Linux VMs**: `10.10.10.101`, `10.10.10.102`, `10.10.10.103`, etc.
+- **Red Kali VMs**: `10.10.10.151`, `10.10.10.152`, etc.
 - All VMs get floating IPs for external access via SSH jump host
 
 ### Network Access Pattern
@@ -149,7 +149,7 @@ python3 import-tofu-to-ansible.py opentofu ansible inventory/production.ini
 
 ### OpenTofu Files
 - `opentofu/main.tf` - Provider configuration with OpenStack credentials
-- `opentofu/variables.tf` - Configurable parameters (VM counts, hostnames, etc.)
+- `opentofu/variables.tf` - Shared parameters (network, flavor, keypair, projects, services)
 - `opentofu/instances-blue-windows.tf` - Blue Team Windows VMs (first VM = Domain Controller)
 - `opentofu/instances-blue-linux.tf` - Blue Team Linux VMs
 - `opentofu/instances-scoring.tf` - Scoring/Grey Team VMs
@@ -193,7 +193,7 @@ python3 import-tofu-to-ansible.py opentofu ansible inventory/production.ini
 ## Important Behavioral Notes
 
 ### Custom Hostnames
-VM names can be customized via `blue_windows_hostnames` and `blue_linux_hostnames` list variables in `variables.tf`. The conditional logic in `instances-blue-windows.tf`:
+VM names can be customized via `blue_windows_hostnames` and `blue_linux_hostnames` list variables in their respective instance files (`instances-blue-windows.tf` and `instances-blue-linux.tf`). The conditional logic in `instances-blue-windows.tf`:
 ```hcl
 name = length(var.blue_windows_hostnames) > count.index ? var.blue_windows_hostnames[count.index] : "blue-win-${count.index + 1}"
 ```
@@ -303,16 +303,18 @@ All connections route through `sshjump@ssh.cyberrange.rit.edu` via SSH ProxyJump
 ## Modifying Infrastructure
 
 ### Changing VM Counts
-Edit `opentofu/variables.tf`:
+Edit the count variable in each VM type's instance file:
 ```hcl
-# Scoring servers (Grey Team)
+# In instances-scoring.tf
 variable "scoring_count" { default = 1 }
 
-# Blue Team VMs
+# In instances-blue-windows.tf
 variable "blue_windows_count" { default = 3 }  # First becomes DC
+
+# In instances-blue-linux.tf
 variable "blue_linux_count" { default = 4 }
 
-# Red Team VMs
+# In instances-red-kali.tf
 variable "red_kali_count" { default = 2 }
 ```
 Then:
@@ -351,13 +353,22 @@ cd .. && python3 import-tofu-to-ansible.py
 - Use templates for configuration files that need variable substitution
 
 ### IP Address Constraints
-Fixed IPs are assigned via string interpolation in each `instances-*.tf` file:
-- Scoring: `10.10.10.1${count.index + 1}` (11, 12, 13...)
-- Blue Windows: `10.10.10.2${count.index + 1}` (21, 22, 23...)
-- Blue Linux: `10.10.10.3${count.index + 1}` (31, 32, 33...)
-- Red Kali: `10.10.10.4${count.index + 1}` (41, 42, 43...)
+Fixed IPs are assigned via `format()` with the `ip_base` local in each `instances-*.tf` file:
+- Scoring: `ip_base = 10` → 10.10.10.11, .12, .13... (main project)
+- Blue Windows: `ip_base = 20` → 10.10.10.21, .22, .23... (blue project)
+- Blue Linux: `ip_base = 100` → 10.10.10.101, .102, .103... (blue project)
+- Red Kali: `ip_base = 150` → 10.10.10.151, .152, .153... (red project)
 
-To change the scheme, edit both the interpolation and the subnet CIDR in `variables.tf`.
+To change the scheme, edit `ip_base` in the relevant instance file's `locals` block and the subnet CIDR in `variables.tf`.
+
+### Required Student Configuration
+Students must update `opentofu/variables.tf` with their own values before deploying:
+- `keypair` — SSH keypair name (uploaded to OpenStack)
+- `main_project_id` — Grey/main OpenStack project ID
+- `blue_project_id` — Blue team OpenStack project ID
+- `red_project_id` — Red team OpenStack project ID
+
+These default to `CHANGEME-*` placeholders and will cause errors if not set.
 
 ## Troubleshooting Context
 
@@ -389,6 +400,7 @@ The `docs/` directory contains detailed guides:
 | Document | Description |
 |----------|-------------|
 | `adding-services-guide.md` | **Beginner-friendly** step-by-step guide for adding each service type |
+| `adding-vm-types.md` | Checklist and walkthrough for adding a new set of VMs |
 | `service-configuration.md` | Technical reference for service configuration |
 | `scoring-engine.md` | How the DWAYNE-INATOR-5000 scoring engine works |
 | `deployment-guide.md` | Full infrastructure deployment guide |

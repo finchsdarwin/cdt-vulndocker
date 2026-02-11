@@ -22,10 +22,10 @@ Servers in this project are assigned IP addresses from two ranges:
 
 | Range | Team | Purpose |
 |-------|------|---------|
-| 10.10.10.11-19 | Grey Team | Scoring servers |
-| 10.10.10.21-29 | Blue Team | Windows servers (DC at .21) |
-| 10.10.10.31-39 | Blue Team | Linux servers |
-| 10.10.10.41-49 | Red Team | Kali attack boxes |
+| 10.10.10.11-20 | Grey Team | Scoring servers |
+| 10.10.10.21-99 | Blue Team | Windows servers (DC at .21) |
+| 10.10.10.101-149 | Blue Team | Linux servers |
+| 10.10.10.151-249 | Red Team | Kali attack boxes |
 
 Even though floating IPs are "public," you cannot reach them directly from the internet. All access goes through a jump host at `ssh.cyberrange.rit.edu`.
 
@@ -398,7 +398,7 @@ Common ports to allow:
 
 | Team | IP Range | Example |
 |------|----------|---------|
-| Grey (Scoring) | 10.10.10.11-19 | 10.10.10.11 |
-| Blue (Windows) | 10.10.10.21-29 | 10.10.10.21 (DC) |
-| Blue (Linux) | 10.10.10.31-39 | 10.10.10.31 |
-| Red (Kali) | 10.10.10.41-49 | 10.10.10.41 |
+| Grey (Scoring) | 10.10.10.11-20 | 10.10.10.11 |
+| Blue (Windows) | 10.10.10.21-99 | 10.10.10.21 (DC) |
+| Blue (Linux) | 10.10.10.101-149 | 10.10.10.101 |
+| Red (Kali) | 10.10.10.151-249 | 10.10.10.151 |

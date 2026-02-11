@@ -6,10 +6,11 @@
 #
 # HOW TO ADD A NEW VM TYPE:
 # 1. Copy this file and rename it (e.g., instances-my-new-type.tf)
-# 2. Update the locals config block with your VM type's parameters
+# 2. Update the variables and locals block with your VM type's parameters
 # 3. Update resource names, data sources, and outputs (search & replace the prefix)
 # 4. Adjust user_data, name logic, and depends_on as needed
 # 5. Run: tofu plan   (should show only your new resources)
+# See docs/adding-vm-types.md for a detailed walkthrough.
 #
 # DOCUMENTATION:
 # - Compute Instance: https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_instance_v2
@@ -17,6 +18,38 @@
 # - Images Data Source: https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/data-sources/images_image_v2
 #
 # ==============================================================================
+
+
+# ------------------------------------------------------------------------------
+# Variables — VM-specific settings for this file
+# ------------------------------------------------------------------------------
+
+variable "blue_windows_count" {
+  description = "Number of Blue Team Windows VMs (first becomes Domain Controller)"
+  type        = number
+  default     = 15
+}
+
+variable "windows_image_name" {
+  description = "Name of the Windows image in OpenStack Glance"
+  type        = string
+  default     = "WindowsServer2022"
+
+  # VIEW AVAILABLE IMAGES:
+  # 1. OpenStack Dashboard: Compute → Images
+  # 2. Command line: openstack image list
+  #
+  # Common images at RIT CyberRange:
+  # - WindowsServer2022
+  # - WindowsServer2019
+  # - Windows10
+}
+
+variable "blue_windows_hostnames" {
+  description = "Custom hostnames for Blue Team Windows VMs (optional)"
+  type        = list(string)
+  default     = ["dc01", "wks-alpha", "wks-debbie"]
+}
 
 
 # ------------------------------------------------------------------------------
@@ -101,9 +134,10 @@ resource "openstack_compute_instance_v2" "blue_windows" {
 # Floating IP allocation
 # ------------------------------------------------------------------------------
 resource "openstack_networking_floatingip_v2" "blue_win_fip" {
-  provider = openstack.blue
-  count    = local.blue_win.count
-  pool     = var.external_network
+  provider   = openstack.blue
+  count      = local.blue_win.count
+  pool       = var.external_network
+  depends_on = [openstack_compute_instance_v2.blue_windows]
 }
 
 

@@ -65,8 +65,8 @@ This is NOT a complete competition environment. It is a starting point that demo
         |                    |                    |                    |
    [Scoring]            [Blue Team]          [Blue Team]          [Red Team]
    10.10.10.1x          Windows              Linux                Kali
-   Main Project         10.10.10.2x          10.10.10.3x          10.10.10.4x
-                        Blue Project         Blue Project         Red Project
+   (Main Project)       10.10.10.2x          10.10.10.10x         10.10.10.15x
+                        (Blue Project)       (Blue Project)       (Red Project)
 ```
 
 ### How Network Sharing Works
@@ -95,10 +95,10 @@ This architecture means:
 
 | Range | Team | Purpose | Project |
 |-------|------|---------|---------|
-| 10.10.10.11-19 | Grey | Scoring servers | Main |
-| 10.10.10.21-29 | Blue | Windows servers (DC at .21) | Blue |
-| 10.10.10.31-39 | Blue | Linux servers | Blue |
-| 10.10.10.41-49 | Red | Kali attack boxes | Red |
+| 10.10.10.11-20 | Grey | Scoring servers | Main |
+| 10.10.10.21-99 | Blue | Windows servers (DC at .21) | Blue |
+| 10.10.10.101-149 | Blue | Linux servers | Blue |
+| 10.10.10.151-249 | Red | Kali attack boxes | Red |
 
 The first Blue Windows server (10.10.10.21) becomes the Active Directory Domain Controller.
 
@@ -209,7 +209,9 @@ cd cdt-automation
 mv ~/Downloads/app-cred-*-openrc.sh .
 ./quick-start.sh
 
-# 3. Edit variables.tf with your project IDs and SSH key name
+# 3. Edit variables.tf — replace CHANGEME placeholders with your values
+#    - keypair (your SSH key name)
+#    - main_project_id, blue_project_id, red_project_id
 nano opentofu/variables.tf
 
 # 4. Deploy infrastructure
@@ -265,38 +267,44 @@ Note the `provider = openstack.main` line. In this multi-project setup, you must
 
 ### Adding Different Server Types
 
-Edit `opentofu/instances.tf` to add new server types. Specify the correct provider for each:
+Each VM type has its own file (`instances-*.tf`). To add a new server type, copy an existing file and modify it. For example, to add web servers to the Blue Team:
+
+1. Copy an existing instance file as a starting point:
+
+```bash
+cp opentofu/instances-blue-linux.tf opentofu/instances-blue-webservers.tf
+```
+
+2. Edit the new file. Update the `locals` block and resource definitions:
 
 ```hcl
-# Example: Adding web servers to Blue Team
+locals {
+  blue_web = {
+    count          = var.blue_webserver_count
+    image          = var.debian_image
+    flavor         = var.flavor
+    ip_base        = 50 # VMs get 10.10.10.51, .52, .53, ...
+  }
+}
+
 resource "openstack_compute_instance_v2" "blue_webservers" {
   provider        = openstack.blue
-  count           = var.blue_webserver_count
+  count           = local.blue_web.count
   name            = "web-${count.index + 1}"
-  image_name      = var.debian_image
-  flavor_name     = var.flavor
-  key_name        = var.keypair_name
+  image_name      = local.blue_web.image
+  flavor_name     = local.blue_web.flavor
+  key_pair        = var.keypair
   security_groups = [openstack_networking_secgroup_v2.blue_linux_sg.name]
   user_data       = file("${path.module}/debian-userdata.yaml")
 
   network {
     uuid        = openstack_networking_network_v2.cdt_net.id
-    fixed_ip_v4 = "10.10.10.5${count.index + 1}"
+    fixed_ip_v4 = format("10.10.10.%d", local.blue_web.ip_base + count.index + 1)
   }
 }
 ```
 
-Add the variable in `variables.tf`:
-
-```hcl
-variable "blue_webserver_count" {
-  description = "Number of Blue Team web servers"
-  type        = number
-  default     = 2
-}
-```
-
-Add the output in `outputs.tf`:
+3. Add the output in the same file (each instance file contains its own outputs):
 
 ```hcl
 output "blue_webserver_ips" {
@@ -305,6 +313,16 @@ output "blue_webserver_ips" {
     names        = openstack_compute_instance_v2.blue_webservers[*].name
     internal_ips = openstack_compute_instance_v2.blue_webservers[*].access_ip_v4
   }
+}
+```
+
+4. Add the count variable at the top of your new file (VM-specific variables live alongside their instances):
+
+```hcl
+variable "blue_webserver_count" {
+  description = "Number of Blue Team web servers"
+  type        = number
+  default     = 2
 }
 ```
 
@@ -392,12 +410,15 @@ This section explains OpenTofu concepts you need to understand for customization
 
 ```
 opentofu/
-  main.tf        - Provider configuration (OpenStack connection, project aliases)
-  variables.tf   - Input variables (things you can change)
-  network.tf     - Network resources (networks, subnets, routers, RBAC policies)
-  instances.tf   - Compute instances (virtual machines)
-  security.tf    - Security groups (firewall rules)
-  outputs.tf     - Output values (information displayed after apply)
+  main.tf                    - Provider configuration (OpenStack connection, project aliases)
+  variables.tf               - Shared variables (network, flavor, keypair, projects)
+  network.tf                 - Network resources (networks, subnets, routers, RBAC policies)
+  instances-blue-windows.tf  - Blue Team Windows VMs (first VM = Domain Controller)
+  instances-blue-linux.tf    - Blue Team Linux VMs
+  instances-scoring.tf       - Scoring/Grey Team VMs
+  instances-red-kali.tf      - Red Team Kali VMs
+  security.tf                - Security groups (firewall rules)
+  outputs.tf                 - Network & shared infrastructure outputs
 ```
 
 ### Provider Aliases
@@ -452,14 +473,14 @@ The TYPE determines what kind of resource (server, network, etc.). The NAME is y
 Variables let you customize values without editing resource definitions:
 
 ```hcl
-# In variables.tf
+# In instances-blue-linux.tf (VM-specific variables live with their instances)
 variable "blue_linux_count" {
   description = "Number of Blue Team Linux servers"
   type        = number
   default     = 2
 }
 
-# In instances.tf
+# Also in instances-blue-linux.tf
 resource "openstack_compute_instance_v2" "blue_linux" {
   provider = openstack.blue
   count    = var.blue_linux_count
@@ -750,7 +771,7 @@ ansible blue_team -m command -a "hostname"
 
 ### Changing Server Counts
 
-Edit `opentofu/variables.tf`:
+Edit the count variable in the relevant instance file (e.g., `opentofu/instances-blue-linux.tf`):
 
 ```hcl
 variable "blue_linux_count" {
@@ -774,14 +795,14 @@ python3 import-tofu-to-ansible.py
 Use the rebuild script:
 
 ```bash
-./rebuild-vm.sh 10.10.10.31
+./rebuild-vm.sh 10.10.10.101
 ```
 
 This destroys and recreates only that server, then runs the appropriate Ansible playbook.
 
 ### Adding a New Service
 
-1. Add the server in OpenTofu (edit `instances.tf`, use correct provider)
+1. Add the server in OpenTofu (copy an existing `instances-*.tf` file, use correct provider)
 2. Run `tofu apply` to create it
 3. Update `import-tofu-to-ansible.py` to include the new server in inventory
 4. Run `python3 import-tofu-to-ansible.py`

@@ -71,7 +71,7 @@ Define each server and what to check:
 ```yaml
 scoring_boxes:
   - name: "webserver"
-    ip: "10.10.10.31"
+    ip: "10.10.10.101"
     checks:
       - type: ping          # Can we reach it?
       - type: ssh           # Can we log in?
@@ -177,7 +177,7 @@ Common issues:
 - **Permission denied**: Service user can't read files
 
 ### Checks Failing Unexpectedly
-1. **Can you reach the box?** Try `ping 10.10.10.31` from scoring server
+1. **Can you reach the box?** Try `ping 10.10.10.101` from scoring server
 2. **Are credentials correct?** Verify usernames/passwords match the target
 3. **Is the service running?** SSH to the box and check
 
@@ -318,7 +318,7 @@ Add flag checks to boxes using SSH (Linux) or SMB (Windows):
 ```yaml
 scoring_boxes:
   - name: "webserver"
-    ip: "10.10.10.31"
+    ip: "10.10.10.101"
     checks:
       - type: ping
       - type: ssh

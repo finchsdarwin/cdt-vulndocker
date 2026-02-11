@@ -162,24 +162,24 @@ These groups combine other groups for convenience:
 ```ini
 # Grey Team - Scoring
 [scoring]
-scoring-1 ansible_host=10.10.10.11 floating_ip=100.65.4.11
+scoring-1 ansible_host=10.10.10.11 floating_ip=100.65.x.x
 
 # Blue Team - Windows
 [windows_dc]
-dc01 ansible_host=10.10.10.21 floating_ip=100.65.4.21
+dc01 ansible_host=10.10.10.21 floating_ip=100.65.x.x
 
 [blue_windows_members]
-blue-win-2 ansible_host=10.10.10.22 floating_ip=100.65.4.22
+wks-alpha ansible_host=10.10.10.22 floating_ip=100.65.x.x
 
 # Blue Team - Linux
 [blue_linux_members]
-webserver ansible_host=10.10.10.31 floating_ip=100.65.4.31
-blue-linux-2 ansible_host=10.10.10.32 floating_ip=100.65.4.32
+webserver ansible_host=10.10.10.101 floating_ip=100.65.x.x
+comms ansible_host=10.10.10.102 floating_ip=100.65.x.x
 
 # Red Team
 [red_team]
-red-kali-1 ansible_host=10.10.10.41 floating_ip=100.65.4.41
-red-kali-2 ansible_host=10.10.10.42 floating_ip=100.65.4.42
+red-kali-1 ansible_host=10.10.10.151 floating_ip=100.65.x.x
+red-kali-2 ansible_host=10.10.10.152 floating_ip=100.65.x.x
 
 # Hierarchy groups
 [windows:children]

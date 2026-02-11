@@ -6,10 +6,11 @@
 #
 # HOW TO ADD A NEW VM TYPE:
 # 1. Copy this file and rename it (e.g., instances-my-new-type.tf)
-# 2. Update the locals config block with your VM type's parameters
+# 2. Update the variables and locals block with your VM type's parameters
 # 3. Update resource names, data sources, and outputs (search & replace the prefix)
 # 4. Adjust user_data, name logic, and depends_on as needed
 # 5. Run: tofu plan   (should show only your new resources)
+# See docs/adding-vm-types.md for a detailed walkthrough.
 #
 # DOCUMENTATION:
 # - Compute Instance: https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_instance_v2
@@ -17,6 +18,37 @@
 # - Images Data Source: https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/data-sources/images_image_v2
 #
 # ==============================================================================
+
+
+# ------------------------------------------------------------------------------
+# Variables — VM-specific settings for this file
+# ------------------------------------------------------------------------------
+
+variable "blue_linux_count" {
+  description = "Number of Blue Team Linux VMs"
+  type        = number
+  default     = 5
+}
+
+variable "debian_image_name" {
+  description = "Name of the Linux image in OpenStack Glance"
+  type        = string
+  default     = "Ubuntu2404Desktop"
+
+  # NOTE: Despite the variable name saying "debian", you can use any Linux image.
+  # The default uses Ubuntu with LXQT desktop pre-installed.
+  #
+  # Common Linux images:
+  # - Ubuntu2404Desktop (Ubuntu 24.04 with LXQT)
+  # - debian-trixie-amd64-cloud
+  # - kali-2024 (for Red Team attack machines)
+}
+
+variable "blue_linux_hostnames" {
+  description = "Custom hostnames for Blue Team Linux VMs (optional)"
+  type        = list(string)
+  default     = ["webserver", "comms"]
+}
 
 
 # ------------------------------------------------------------------------------
@@ -102,9 +134,10 @@ resource "openstack_compute_instance_v2" "blue_linux" {
 # Floating IP allocation
 # ------------------------------------------------------------------------------
 resource "openstack_networking_floatingip_v2" "blue_linux_fip" {
-  provider = openstack.blue
-  count    = local.blue_linux.count
-  pool     = var.external_network
+  provider   = openstack.blue
+  count      = local.blue_linux.count
+  pool       = var.external_network
+  depends_on = [openstack_compute_instance_v2.blue_linux]
 }
 
 

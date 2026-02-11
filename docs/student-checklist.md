@@ -128,14 +128,14 @@ mv ~/Downloads/app-cred-*-openrc.sh .
 
 ### 1.8 Configure Project IDs and SSH Key
 
-Edit `opentofu/variables.tf` and update these variables:
+Edit `opentofu/variables.tf` and replace the `CHANGEME-*` placeholders with your values:
 
-- `keypair_name` - your SSH key name from step 1.4
-- `main_project_id` - your main project ID from step 1.5
-- `blue_project_id` - your blue project ID from step 1.5
-- `red_project_id` - your red project ID from step 1.5
+- `keypair` - your SSH key name from step 1.4 (replace `CHANGEME-YourKeypairName`)
+- `main_project_id` - your main project ID from step 1.5 (replace `CHANGEME-main-project-id`)
+- `blue_project_id` - your blue project ID from step 1.5 (replace `CHANGEME-blue-project-id`)
+- `red_project_id` - your red project ID from step 1.5 (replace `CHANGEME-red-project-id`)
 
-- [ ] keypair_name variable updated
+- [ ] keypair variable updated
 - [ ] main_project_id variable updated
 - [ ] blue_project_id variable updated
 - [ ] red_project_id variable updated

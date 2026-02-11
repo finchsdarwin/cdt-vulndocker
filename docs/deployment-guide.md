@@ -61,7 +61,7 @@ By the end of this guide, you will have deployed:
        |                    |                    |                    |
   [Scoring]            [Blue Team]          [Blue Team]          [Red Team]
   10.10.10.1x          Windows              Linux                Kali
-  (Grey Team)          10.10.10.2x          10.10.10.3x          10.10.10.4x
+  (Grey Team)          10.10.10.2x          10.10.10.10x         10.10.10.15x
 ```
 
 All servers will be on the same network but owned by different OpenStack projects. This allows your Grey Team to control the network while Blue Team and Red Team only have access to their own servers.
@@ -341,7 +341,7 @@ OpenTofu needs the unique IDs of your three projects, not just their names.
 
    c. Find your project in the list
 
-   d. The **Project ID** column shows a long string of letters and numbers (like `04846fb2e027424d8898953062787b16`)
+   d. The **Project ID** column shows a long string of letters and numbers (like `a1b2c3d4e5f6...`)
 
    e. Click the ID to copy it, or write it down
 
@@ -452,33 +452,33 @@ code opentofu/variables.tf
 
 Find these sections and update them with your values:
 
-**SSH Key Name:**
+**SSH Key Name** (look for `CHANGEME-YourKeypairName`):
 ```hcl
-variable "keypair_name" {
-  description = "Name of SSH keypair to use"
+variable "keypair" {
+  description = "Name of the SSH keypair in OpenStack (must be uploaded first)"
   type        = string
-  default     = "my-laptop-key"  # <-- Change this to YOUR key pair name
+  default     = "CHANGEME-YourKeypairName"  # <-- Change this to YOUR key pair name
 }
 ```
 
-**Project IDs:**
+**Project IDs** (look for `CHANGEME-*-project-id`):
 ```hcl
 variable "main_project_id" {
-  description = "OpenStack project ID for main/grey team"
+  description = "OpenStack project ID for main/scoring infrastructure"
   type        = string
-  default     = "your-main-project-id-here"  # <-- Paste your main project ID
+  default     = "CHANGEME-main-project-id"  # <-- Paste your main project ID
 }
 
 variable "blue_project_id" {
-  description = "OpenStack project ID for blue team"
+  description = "OpenStack project ID for Blue Team"
   type        = string
-  default     = "your-blue-project-id-here"  # <-- Paste your blue project ID
+  default     = "CHANGEME-blue-project-id"  # <-- Paste your blue project ID
 }
 
 variable "red_project_id" {
-  description = "OpenStack project ID for red team"
+  description = "OpenStack project ID for Red Team"
   type        = string
-  default     = "your-red-project-id-here"  # <-- Paste your red project ID
+  default     = "CHANGEME-red-project-id"  # <-- Paste your red project ID
 }
 ```
 
@@ -623,20 +623,20 @@ You should see groups of servers with their IP addresses:
 
 ```ini
 [scoring]
-scoring-1 ansible_host=10.10.10.11 floating_ip=100.65.4.11
+scoring-1 ansible_host=10.10.10.11 floating_ip=100.65.x.x
 
 [windows_dc]
-dc01 ansible_host=10.10.10.21 floating_ip=100.65.4.21
+dc01 ansible_host=10.10.10.21 floating_ip=100.65.x.x
 
 [blue_windows_members]
-blue-win-2 ansible_host=10.10.10.22 floating_ip=100.65.4.22
+wks-alpha ansible_host=10.10.10.22 floating_ip=100.65.x.x
 
 [blue_linux_members]
-webserver ansible_host=10.10.10.31 floating_ip=100.65.4.31
+webserver ansible_host=10.10.10.101 floating_ip=100.65.x.x
 
 [red_team]
-red-kali-1 ansible_host=10.10.10.41 floating_ip=100.65.4.41
-red-kali-2 ansible_host=10.10.10.42 floating_ip=100.65.4.42
+red-kali-1 ansible_host=10.10.10.151 floating_ip=100.65.x.x
+red-kali-2 ansible_host=10.10.10.152 floating_ip=100.65.x.x
 ...
 ```
 

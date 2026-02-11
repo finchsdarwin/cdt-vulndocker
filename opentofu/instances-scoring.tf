@@ -6,10 +6,11 @@
 #
 # HOW TO ADD A NEW VM TYPE:
 # 1. Copy this file and rename it (e.g., instances-my-new-type.tf)
-# 2. Update the locals config block with your VM type's parameters
+# 2. Update the variables and locals block with your VM type's parameters
 # 3. Update resource names, data sources, and outputs (search & replace the prefix)
 # 4. Adjust user_data, name logic, and depends_on as needed
 # 5. Run: tofu plan   (should show only your new resources)
+# See docs/adding-vm-types.md for a detailed walkthrough.
 #
 # DOCUMENTATION:
 # - Compute Instance: https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_instance_v2
@@ -17,6 +18,23 @@
 # - Images Data Source: https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/data-sources/images_image_v2
 #
 # ==============================================================================
+
+
+# ------------------------------------------------------------------------------
+# Variables — VM-specific settings for this file
+# ------------------------------------------------------------------------------
+
+variable "scoring_count" {
+  description = "Number of scoring servers to create in main project"
+  type        = number
+  default     = 1
+}
+
+variable "scoring_image_name" {
+  description = "Name of the image for scoring servers"
+  type        = string
+  default     = "Ubuntu2404Desktop"
+}
 
 
 # ------------------------------------------------------------------------------
@@ -101,9 +119,10 @@ resource "openstack_compute_instance_v2" "scoring" {
 # Floating IP allocation
 # ------------------------------------------------------------------------------
 resource "openstack_networking_floatingip_v2" "scoring_fip" {
-  provider = openstack.main
-  count    = local.scoring.count
-  pool     = var.external_network
+  provider   = openstack.main
+  count      = local.scoring.count
+  pool       = var.external_network
+  depends_on = [openstack_compute_instance_v2.scoring]
 }
 
 
@@ -174,8 +193,8 @@ output "scoring_floating_ips" {
 #
 #   +-----------------+     Network Traffic     +-----------------+
 #   |   RED TEAM      |  ===================>   |   BLUE TEAM     |
-#   |   10.10.10.4x   |                         |   10.10.10.2x   |
-#   |   (Kali VMs)    |                         |   10.10.10.3x   |
+#   |   10.10.10.15x  |                         |   10.10.10.2x   |
+#   |   (Kali VMs)    |                         |   10.10.10.10x  |
 #   +-----------------+                         +-----------------+
 #           ^                                           |
 #           |              +-----------------+          |

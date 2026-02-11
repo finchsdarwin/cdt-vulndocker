@@ -132,7 +132,7 @@ log_success "Found VM: ${VM_NAME} (type: ${VM_TYPE}, index: ${VM_INDEX})"
 
 # Determine the resource identifier
 RESOURCE_NAME="openstack_compute_instance_v2.${VM_TYPE}[${VM_INDEX}]"
-FIP_RESOURCE="openstack_networking_floatingip_associate_v2.${VM_TYPE}_fip_assoc[${VM_INDEX}]"
+FIP_RESOURCE="openstack_compute_floatingip_associate_v2.${VM_TYPE}_fip_assoc[${VM_INDEX}]"
 
 log_warning "About to rebuild: ${VM_NAME}"
 log_warning "Resource: ${RESOURCE_NAME}"
