@@ -39,6 +39,49 @@ variable "kali_image_name" {
 
 
 # ------------------------------------------------------------------------------
+# Security group
+# ------------------------------------------------------------------------------
+# Security groups must live in the SAME project as the VMs that use them.
+
+resource "openstack_networking_secgroup_v2" "red_linux_sg" {
+  provider    = openstack.red
+  name        = "red-linux-sg"
+  description = "Security group for Red Team Kali attack VMs"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "red_ssh" {
+  provider          = openstack.red
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.red_linux_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "red_rdp" {
+  provider          = openstack.red
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 3389
+  port_range_max    = 3389
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.red_linux_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "red_internal" {
+  provider          = openstack.red
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = ""
+  remote_ip_prefix  = var.subnet_cidr
+  security_group_id = openstack_networking_secgroup_v2.red_linux_sg.id
+}
+
+
+# ------------------------------------------------------------------------------
 # Configuration — edit these values when copying this file for a new VM type
 # ------------------------------------------------------------------------------
 locals {

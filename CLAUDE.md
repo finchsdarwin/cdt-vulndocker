@@ -155,7 +155,6 @@ python3 import-tofu-to-ansible.py opentofu ansible inventory/production.ini
 - `opentofu/instances-scoring.tf` - Scoring/Grey Team VMs
 - `opentofu/instances-red-kali.tf` - Red Team Kali VMs
 - `opentofu/network.tf` - Network, subnet, and router configuration
-- `opentofu/security.tf` - Security groups and firewall rules
 - `opentofu/outputs.tf` - Outputs consumed by import script
 - `opentofu/windows-userdata.ps1` - Cloud-init for Windows (enables WinRM)
 - `opentofu/debian-userdata.yaml` - Cloud-init for Linux

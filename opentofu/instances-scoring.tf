@@ -38,6 +38,71 @@ variable "scoring_image_name" {
 
 
 # ------------------------------------------------------------------------------
+# Security group
+# ------------------------------------------------------------------------------
+# Security groups must live in the SAME project as the VMs that use them.
+
+resource "openstack_networking_secgroup_v2" "scoring_sg" {
+  provider    = openstack.main
+  name        = "scoring-sg"
+  description = "Security group for scoring/Grey Team servers"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "scoring_ssh" {
+  provider          = openstack.main
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.scoring_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "scoring_http" {
+  provider          = openstack.main
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 80
+  port_range_max    = 80
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.scoring_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "scoring_https" {
+  provider          = openstack.main
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 443
+  port_range_max    = 443
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.scoring_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "scoring_rdp" {
+  provider          = openstack.main
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 3389
+  port_range_max    = 3389
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.scoring_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "scoring_internal" {
+  provider          = openstack.main
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = ""
+  remote_ip_prefix  = var.subnet_cidr
+  security_group_id = openstack_networking_secgroup_v2.scoring_sg.id
+}
+
+
+# ------------------------------------------------------------------------------
 # Configuration — edit these values when copying this file for a new VM type
 # ------------------------------------------------------------------------------
 locals {

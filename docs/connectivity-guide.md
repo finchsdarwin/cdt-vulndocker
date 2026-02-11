@@ -315,7 +315,7 @@ For connections to work, the destination server's security group must allow the 
 
 The default security group in this project (`allow_all`) permits all inbound and outbound traffic. This is appropriate for learning environments.
 
-For your competition, you may want more restrictive security groups. Check `opentofu/security.tf` to see or modify security group rules.
+For your competition, you may want more restrictive security groups. Each `instances-*.tf` file contains the security group for its VM type — edit the rules there.
 
 Common ports to allow:
 - SSH: TCP 22

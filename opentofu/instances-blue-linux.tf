@@ -52,6 +52,49 @@ variable "blue_linux_hostnames" {
 
 
 # ------------------------------------------------------------------------------
+# Security group
+# ------------------------------------------------------------------------------
+# Security groups must live in the SAME project as the VMs that use them.
+
+resource "openstack_networking_secgroup_v2" "blue_linux_sg" {
+  provider    = openstack.blue
+  name        = "blue-linux-sg"
+  description = "Security group for Blue Team Linux VMs - allows SSH (22) and RDP (3389)"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "blue_linux_ssh" {
+  provider          = openstack.blue
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.blue_linux_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "blue_linux_rdp" {
+  provider          = openstack.blue
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 3389
+  port_range_max    = 3389
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.blue_linux_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "blue_linux_internal" {
+  provider          = openstack.blue
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = ""
+  remote_ip_prefix  = var.subnet_cidr
+  security_group_id = openstack_networking_secgroup_v2.blue_linux_sg.id
+}
+
+
+# ------------------------------------------------------------------------------
 # Configuration — edit these values when copying this file for a new VM type
 # ------------------------------------------------------------------------------
 locals {

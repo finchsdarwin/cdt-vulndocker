@@ -22,7 +22,6 @@
 #   main.tf                    <- YOU ARE HERE (providers, authentication)
 #   variables.tf               <- Input variables you can customize
 #   network.tf                 <- Virtual networks, subnets, routers
-#   security.tf                <- Firewall rules (security groups)
 #   instances-blue-windows.tf  <- Blue Team Windows VMs
 #   instances-blue-linux.tf    <- Blue Team Linux VMs
 #   instances-scoring.tf       <- Scoring/Grey Team VMs

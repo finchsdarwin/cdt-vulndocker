@@ -9,7 +9,6 @@ opentofu/
   main.tf                    - Provider configuration (OpenStack connection, project aliases)
   variables.tf               - Shared variables (network, flavor, keypair, projects, services)
   network.tf                 - Network, subnet, router, and RBAC sharing policies
-  security.tf                - Security groups (firewall rules per project)
   instances-blue-windows.tf  - Blue Team Windows VMs (first VM = Domain Controller)
   instances-blue-linux.tf    - Blue Team Linux VMs
   instances-scoring.tf       - Scoring/Grey Team VMs
@@ -39,12 +38,13 @@ Three OpenStack provider aliases deploy resources to different projects:
 Each VM type lives in its own `instances-*.tf` file. Every file follows the same pattern:
 
 1. **Variables** - VM-specific inputs (count, image name, hostnames)
-2. **`locals` block** - Configuration values (references variables + shared vars like flavor/keypair)
-3. **Image data source** - Looks up the OS image in OpenStack Glance
-4. **Compute instance** - Creates the VMs
-5. **Floating IP allocation** - Reserves external IPs
-6. **Floating IP association** - Attaches external IPs to VMs
-7. **Outputs** - Exposes names, internal IPs, and floating IPs
+2. **Security group** - Firewall rules for this VM type (must be in same project)
+3. **`locals` block** - Configuration values (references variables + shared vars like flavor/keypair)
+4. **Image data source** - Looks up the OS image in OpenStack Glance
+5. **Compute instance** - Creates the VMs
+6. **Floating IP allocation** - Reserves external IPs
+7. **Floating IP association** - Attaches external IPs to VMs
+8. **Outputs** - Exposes names, internal IPs, and floating IPs
 
 This pattern makes it straightforward to add new VM types by copying an existing file. See [Adding a New VM Type](../docs/adding-vm-types.md) for a step-by-step guide.
 

@@ -417,7 +417,6 @@ opentofu/
   instances-blue-linux.tf    - Blue Team Linux VMs
   instances-scoring.tf       - Scoring/Grey Team VMs
   instances-red-kali.tf      - Red Team Kali VMs
-  security.tf                - Security groups (firewall rules)
   outputs.tf                 - Network & shared infrastructure outputs
 ```
 

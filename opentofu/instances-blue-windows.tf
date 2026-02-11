@@ -53,6 +53,60 @@ variable "blue_windows_hostnames" {
 
 
 # ------------------------------------------------------------------------------
+# Security group
+# ------------------------------------------------------------------------------
+# Security groups must live in the SAME project as the VMs that use them.
+
+resource "openstack_networking_secgroup_v2" "blue_windows_sg" {
+  provider    = openstack.blue
+  name        = "blue-windows-sg"
+  description = "Security group for Blue Team Windows VMs - WinRM (5985/5986) and RDP (3389)"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "blue_windows_winrm_http" {
+  provider          = openstack.blue
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 5985
+  port_range_max    = 5985
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.blue_windows_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "blue_windows_winrm_https" {
+  provider          = openstack.blue
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 5986
+  port_range_max    = 5986
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.blue_windows_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "blue_windows_rdp" {
+  provider          = openstack.blue
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 3389
+  port_range_max    = 3389
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.blue_windows_sg.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "blue_windows_internal" {
+  provider          = openstack.blue
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = ""
+  remote_ip_prefix  = var.subnet_cidr
+  security_group_id = openstack_networking_secgroup_v2.blue_windows_sg.id
+}
+
+
+# ------------------------------------------------------------------------------
 # Configuration — edit these values when copying this file for a new VM type
 # ------------------------------------------------------------------------------
 locals {

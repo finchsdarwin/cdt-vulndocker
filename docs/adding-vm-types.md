@@ -16,7 +16,7 @@ Use this as a quick reference. Each step is explained in detail below.
 - [ ] **Update the `user_data`** — point to the right cloud-init script (or create a new one)
 - [ ] **Rename all outputs** — match them to your new resource names
 - [ ] **Add variables at the top of your instance file** — count, optional hostname list, optional image variable
-- [ ] **Add or reuse a security group** in `security.tf` if the new VMs need different firewall rules
+- [ ] **Add or reuse a security group** in your instance file if the new VMs need different firewall rules
 - [ ] **Run `tofu plan`** — verify only your new resources appear (no changes to existing ones)
 - [ ] **Run `tofu apply`** — create the VMs
 
@@ -175,7 +175,7 @@ Shared variables like `flavor_name`, `keypair`, and `external_network` stay in `
 
 ### 7. Add a Security Group (If Needed)
 
-If the new VMs need different firewall rules, add a security group in `security.tf`. Otherwise, reuse an existing one (like `blue_linux_sg`).
+If the new VMs need different firewall rules, add a security group in your instance file (each `instances-*.tf` file contains its own security group). Otherwise, reuse an existing one (like `blue_linux_sg` from `instances-blue-linux.tf`).
 
 ```hcl
 resource "openstack_networking_secgroup_v2" "blue_db_sg" {
@@ -394,7 +394,7 @@ Here is every file that needs to change, start to finish:
 
 | File | What to Change |
 |------|---------------|
-| `opentofu/security.tf` | Add security group if VMs need different firewall rules |
+| Your `instances-*.tf` file | Add security group if VMs need different firewall rules |
 | `import-tofu-to-ansible.py` | Parse new outputs, write new inventory group, update hierarchy |
 | `ansible/playbooks/site.yml` | Import the new playbook |
 
