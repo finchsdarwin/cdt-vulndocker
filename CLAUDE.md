@@ -150,7 +150,10 @@ python3 import-tofu-to-ansible.py opentofu ansible inventory/production.ini
 ### OpenTofu Files
 - `opentofu/main.tf` - Provider configuration with OpenStack credentials
 - `opentofu/variables.tf` - Configurable parameters (VM counts, hostnames, etc.)
-- `opentofu/instances.tf` - VM definitions with conditional hostname logic
+- `opentofu/instances-blue-windows.tf` - Blue Team Windows VMs (first VM = Domain Controller)
+- `opentofu/instances-blue-linux.tf` - Blue Team Linux VMs
+- `opentofu/instances-scoring.tf` - Scoring/Grey Team VMs
+- `opentofu/instances-red-kali.tf` - Red Team Kali VMs
 - `opentofu/network.tf` - Network, subnet, and router configuration
 - `opentofu/security.tf` - Security groups and firewall rules
 - `opentofu/outputs.tf` - Outputs consumed by import script
@@ -190,7 +193,7 @@ python3 import-tofu-to-ansible.py opentofu ansible inventory/production.ini
 ## Important Behavioral Notes
 
 ### Custom Hostnames
-VM names can be customized via `blue_windows_hostnames` and `blue_linux_hostnames` list variables in `variables.tf`. The conditional logic in `instances.tf`:
+VM names can be customized via `blue_windows_hostnames` and `blue_linux_hostnames` list variables in `variables.tf`. The conditional logic in `instances-blue-windows.tf`:
 ```hcl
 name = length(var.blue_windows_hostnames) > count.index ? var.blue_windows_hostnames[count.index] : "blue-win-${count.index + 1}"
 ```
@@ -348,7 +351,7 @@ cd .. && python3 import-tofu-to-ansible.py
 - Use templates for configuration files that need variable substitution
 
 ### IP Address Constraints
-Fixed IPs are assigned via string interpolation in `instances.tf`:
+Fixed IPs are assigned via string interpolation in each `instances-*.tf` file:
 - Scoring: `10.10.10.1${count.index + 1}` (11, 12, 13...)
 - Blue Windows: `10.10.10.2${count.index + 1}` (21, 22, 23...)
 - Blue Linux: `10.10.10.3${count.index + 1}` (31, 32, 33...)

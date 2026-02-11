@@ -300,7 +300,7 @@ resource "openstack_networking_subnet_v2" "NETWORK_NAME_subnet" {
 
 ### 3.2 Create Instance Resources
 
-Edit `opentofu/instances.tf` to add your servers.
+Edit the appropriate `opentofu/instances-*.tf` file (or copy one to create a new VM type).
 
 For each server type, add a resource block. Use the existing resources as templates. Specify the correct provider for each team:
 

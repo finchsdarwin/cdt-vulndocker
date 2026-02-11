@@ -86,8 +86,8 @@ resource "openstack_networking_secgroup_rule_v2" "blue_linux_internal" {
   provider          = openstack.blue
   direction         = "ingress"
   ethertype         = "IPv4"
-  protocol          = ""                # Empty = all protocols
-  remote_ip_prefix  = var.subnet_cidr   # Only from our subnet (10.10.10.0/24)
+  protocol          = ""              # Empty = all protocols
+  remote_ip_prefix  = var.subnet_cidr # Only from our subnet (10.10.10.0/24)
   security_group_id = openstack_networking_secgroup_v2.blue_linux_sg.id
 
   # WHY ALLOW ALL INTERNAL TRAFFIC:

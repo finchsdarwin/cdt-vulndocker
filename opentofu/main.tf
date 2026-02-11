@@ -19,12 +19,15 @@
 # ==================
 # This project is split into multiple .tf files for clarity:
 #
-#   main.tf       <- YOU ARE HERE (providers, authentication)
-#   variables.tf  <- Input variables you can customize
-#   network.tf    <- Virtual networks, subnets, routers
-#   security.tf   <- Firewall rules (security groups)
-#   instances.tf  <- Virtual machines (compute instances)
-#   outputs.tf    <- Information displayed after deployment
+#   main.tf                    <- YOU ARE HERE (providers, authentication)
+#   variables.tf               <- Input variables you can customize
+#   network.tf                 <- Virtual networks, subnets, routers
+#   security.tf                <- Firewall rules (security groups)
+#   instances-blue-windows.tf  <- Blue Team Windows VMs
+#   instances-blue-linux.tf    <- Blue Team Linux VMs
+#   instances-scoring.tf       <- Scoring/Grey Team VMs
+#   instances-red-kali.tf      <- Red Team Kali VMs
+#   outputs.tf                 <- Network outputs & reference comments
 #
 # OpenTofu reads ALL .tf files in a directory together - the split is just
 # for human organization. You could put everything in one file, but don't!

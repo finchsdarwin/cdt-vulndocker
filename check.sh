@@ -12,10 +12,25 @@ echo ""
 # Track overall exit status
 EXIT_STATUS=0
 
+# Check if OpenTofu is installed
+if ! command -v tofu &> /dev/null; then
+    echo "❌ OpenTofu (tofu) is not installed"
+    echo "   Install with:"
+    echo "     curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh"
+    echo "     chmod +x install-opentofu.sh"
+    echo "     sudo ./install-opentofu.sh --install-method deb    # Debian/Ubuntu"
+    echo "     rm -f install-opentofu.sh"
+    echo "   Or run: ./quick-start.sh (installs automatically)"
+    EXIT_STATUS=1
+else
+    echo "📦 OpenTofu found: $(tofu version | head -n1)"
+fi
+
 # Check if tflint is installed
 if ! command -v tflint &> /dev/null; then
     echo "❌ tflint is not installed"
-    echo "   Install with: curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash"
+    echo "   Install with:"
+    echo "     curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash"
     EXIT_STATUS=1
 else
     echo "📦 tflint found: $(tflint --version | head -n1)"
@@ -33,9 +48,9 @@ fi
 
 echo ""
 
-# Exit early if linters are not installed
+# Exit early if tools are not installed
 if [ $EXIT_STATUS -ne 0 ]; then
-    echo "❌ Please install the missing linters before continuing"
+    echo "❌ Please install the missing tools before continuing"
     exit 1
 fi
 

@@ -64,7 +64,7 @@ resource "openstack_networking_subnet_v2" "cdt_subnet" {
   provider = openstack.main
   # Subnet must be in the same project as its parent network
 
-  name       = "${var.network_name}-subnet"
+  name = "${var.network_name}-subnet"
   # ${...} is string interpolation - inserts variable value into string
   # Result: "cdt-net-subnet"
 
@@ -73,7 +73,7 @@ resource "openstack_networking_subnet_v2" "cdt_subnet" {
   # Syntax: RESOURCE_TYPE.RESOURCE_NAME.ATTRIBUTE
   # .id returns the unique identifier OpenStack assigned to the network
 
-  cidr       = var.subnet_cidr
+  cidr = var.subnet_cidr
   # The IP range: "10.10.10.0/24"
   # VMs will get addresses like 10.10.10.21, 10.10.10.31, etc.
 
@@ -300,5 +300,5 @@ resource "openstack_networking_rbac_policy_v2" "share_with_red" {
 #   target_tenant = var.blue_project_id
 # }
 #
-# Then update instances.tf to put web servers on the DMZ network.
+# Then update the relevant instances-*.tf file to put web servers on the DMZ network.
 # ==============================================================================

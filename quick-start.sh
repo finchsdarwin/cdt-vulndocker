@@ -31,11 +31,38 @@ PACKAGES_TO_INSTALL=()
 
 # Check if OpenTofu is installed
 if ! command -v tofu &> /dev/null; then
-    echo "❌ OpenTofu not found. Please install it first:"
-    echo "   Visit: https://opentofu.org/docs/intro/install/"
-    echo "   Quick install (Linux):"
-    echo "     curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo bash"
-    exit 1
+    echo "❌ OpenTofu not found"
+    echo ""
+
+    # Determine install method based on detected OS
+    case "$OS" in
+        debian)  TOFU_METHOD="deb" ;;
+        redhat)  TOFU_METHOD="rpm" ;;
+        macos)   TOFU_METHOD="brew" ;;
+        *)       TOFU_METHOD="standalone" ;;
+    esac
+
+    echo "   Install method for your OS: --install-method $TOFU_METHOD"
+    read -p "   Install OpenTofu now? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "   Downloading OpenTofu installer..."
+        curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o /tmp/install-opentofu.sh
+        chmod +x /tmp/install-opentofu.sh
+        echo "   Running installer with --install-method $TOFU_METHOD ..."
+        sudo /tmp/install-opentofu.sh --install-method "$TOFU_METHOD"
+        rm -f /tmp/install-opentofu.sh
+        echo "✅ OpenTofu installed successfully"
+    else
+        echo "   To install manually:"
+        echo "     curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh"
+        echo "     chmod +x install-opentofu.sh"
+        echo "     sudo ./install-opentofu.sh --install-method $TOFU_METHOD"
+        echo "     rm -f install-opentofu.sh"
+        echo ""
+        echo "   See: https://opentofu.org/docs/intro/install/"
+        exit 1
+    fi
 fi
 echo "✅ OpenTofu found: $(tofu version | head -n1)"
 
