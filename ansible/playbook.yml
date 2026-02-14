@@ -2,6 +2,15 @@
 - name: Deploy Docker
   hosts: all
   become: true
+  tags: docker
 
   roles:
   - docker
+
+- name: Install Apache2
+  hosts: all
+  become: true
+  tags: Apache2
+
+  roles:
+  - apache

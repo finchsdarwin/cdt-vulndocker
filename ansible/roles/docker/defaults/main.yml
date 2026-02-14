@@ -1,0 +1,27 @@
+---
+# ==============================================================================
+# LINUX DOMAIN MEMBER ROLE - DEFAULT VARIABLES
+# ==============================================================================
+
+# Domain configuration (inherited from group_vars)
+ldm_domain_name: "{{ domain_name }}"
+ldm_domain_netbios_name: "{{ domain_netbios_name }}"
+ldm_realm: "{{ kerberos_realm }}"
+
+# Packages to install (Ubuntu 24.04 specific)
+ldm_packages:
+  - realmd           # Domain joining utility
+  - sssd-ad          # SSSD Active Directory provider
+  - sssd-tools       # SSSD utilities
+  - adcli            # AD command-line tool
+  - krb5-user        # Kerberos client
+  - packagekit       # Required by realmd
+  - libnss-sss       # NSS module for SSSD
+  - libpam-sss       # PAM module for SSSD
+  - samba-common-bin # Samba utilities (net, smbclient)
+  - oddjob           # D-Bus service for privileged operations
+  - oddjob-mkhomedir # Auto-create home directories
+
+# Home directory configuration
+ldm_create_home_dirs: true
+ldm_home_dir_template: /home/%u
