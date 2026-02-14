@@ -20,3 +20,14 @@
     name: smbd
     state: restarted
   failed_when: false  # Samba might not be running yet
+---
+# =============================================================================
+# MySQL Handlers
+# =============================================================================
+# Handlers are special tasks that only run when "notified" by another task.
+# This is useful for restarting services only when configuration changes.
+
+- name: Restart MySQL
+  ansible.builtin.service:
+    name: mysql
+    state: restarted
